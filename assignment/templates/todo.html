@@ -2,45 +2,48 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Todo List with UUID</title>
+    <title>Advanced Todo List</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
     <style>
         body {
             font-family: Arial, sans-serif;
-            background: #f2f2f2;
+            background: #f4f6f8;
             display: flex;
             justify-content: center;
-            padding-top: 50px;
+            padding: 40px;
         }
 
         .container {
             background: white;
-            width: 420px;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            width: 500px;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
 
         h2 {
             text-align: center;
+            margin-bottom: 20px;
         }
 
         input, textarea {
             width: 100%;
-            padding: 8px;
-            margin: 8px 0;
-            border-radius: 5px;
+            padding: 10px;
+            margin-bottom: 12px;
+            border-radius: 6px;
             border: 1px solid #ccc;
+            font-size: 14px;
         }
 
         button {
             width: 100%;
-            padding: 10px;
+            padding: 12px;
             background: #4CAF50;
-            color: white;
             border: none;
-            border-radius: 5px;
+            color: white;
+            font-size: 16px;
+            border-radius: 6px;
             cursor: pointer;
         }
 
@@ -49,17 +52,23 @@
         }
 
         .todo-item {
-            background: #fafafa;
-            margin-top: 10px;
-            padding: 10px;
-            border-radius: 5px;
+            background: #f9f9f9;
+            padding: 12px;
+            margin-top: 15px;
+            border-radius: 6px;
             border: 1px solid #ddd;
+            font-size: 13px;
+        }
+
+        .todo-item strong {
+            display: block;
+            margin-bottom: 5px;
         }
 
         .meta {
-            font-size: 12px;
+            font-size: 11px;
             color: #555;
-            margin-top: 6px;
+            margin-top: 8px;
             word-break: break-all;
         }
     </style>
@@ -67,11 +76,11 @@
 <body>
 
 <div class="container">
-    <h2>Todo List</h2>
+    <h2>Advanced Todo List</h2>
 
     <form id="todoForm">
         <input type="text" id="itemName" placeholder="Item Name" required>
-        <textarea id="itemDescription" placeholder="Item Description" rows="3" required></textarea>
+        <textarea id="itemDescription" rows="3" placeholder="Item Description" required></textarea>
         <button type="submit">Add Item</button>
     </form>
 
@@ -79,34 +88,51 @@
 </div>
 
 <script>
-    let itemIdCounter = 1;
-
     const form = document.getElementById("todoForm");
     const todoList = document.getElementById("todoList");
 
-    form.addEventListener("submit", function(event) {
-        event.preventDefault();
+    let itemCounter = 1;
+
+    // Generate UUID
+    function generateUUID() {
+        return crypto.randomUUID();
+    }
+
+    // Generate SHA-256 hash
+    async function generateHash(text) {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(text);
+        const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
+
+    form.addEventListener("submit", async function(e) {
+        e.preventDefault();
 
         const name = document.getElementById("itemName").value;
         const description = document.getElementById("itemDescription").value;
 
-        const uuid = crypto.randomUUID(); // Generate UUID
+        const id = itemCounter++;
+        const uuid = generateUUID();
+        const hash = await generateHash(name + description + uuid);
 
         const itemDiv = document.createElement("div");
         itemDiv.classList.add("todo-item");
 
         itemDiv.innerHTML = `
             <strong>${name}</strong>
-            <p>${description}</p>
+            <div>${description}</div>
+
             <div class="meta">
-                <div><b>Item ID:</b> ${itemIdCounter}</div>
+                <div><b>Item ID:</b> ${id}</div>
                 <div><b>Item UUID:</b> ${uuid}</div>
+                <div><b>Item Hash (SHA-256):</b> ${hash}</div>
             </div>
         `;
 
         todoList.appendChild(itemDiv);
 
-        itemIdCounter++;
         form.reset();
     });
 </script>
