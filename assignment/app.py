@@ -29,5 +29,9 @@ def signup():
     form_data=dict(request.form)
     collection.insert_one(form_data)
     return "Data submitted successfully"
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+	return render_template('login.html')
+
 if __name__ == '__main__':
     app.run(debug=True)
