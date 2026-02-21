@@ -2,121 +2,140 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
+    <title>Advanced Todo List</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Todo List</title>
+
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #f5f5f5;
+            background: #f4f6f8;
             display: flex;
             justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
+            padding: 40px;
         }
-        .todo-container {
-            background-color: white;
-            width: 400px;
-            padding: 20px;
-            border-radius: 8px;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-            text-align: center;
+
+        .container {
+            background: white;
+            width: 500px;
+            padding: 25px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
         }
+
         h2 {
+            text-align: center;
             margin-bottom: 20px;
-            font-size: 24px;
-            color: #333;
         }
-        input[type="text"], textarea {
+
+        input, textarea {
             width: 100%;
             padding: 10px;
-            margin: 10px 0;
+            margin-bottom: 12px;
+            border-radius: 6px;
             border: 1px solid #ccc;
-            border-radius: 4px;
-            font-size: 16px;
-            box-sizing: border-box;
+            font-size: 14px;
         }
+
         button {
             width: 100%;
             padding: 12px;
+            background: #4CAF50;
             border: none;
-            border-radius: 4px;
-            background-color: #4CAF50;
             color: white;
             font-size: 16px;
+            border-radius: 6px;
             cursor: pointer;
         }
+
         button:hover {
-            background-color: #45a049;
+            background: #45a049;
         }
-        .todo-list {
-            margin-top: 20px;
-            list-style-type: none;
-            padding: 0;
-        }
+
         .todo-item {
-            background-color: #f9f9f9;
-            padding: 10px;
-            margin: 5px 0;
-            border-radius: 4px;
-            border: 1px solid #e0e0e0;
+            background: #f9f9f9;
+            padding: 12px;
+            margin-top: 15px;
+            border-radius: 6px;
+            border: 1px solid #ddd;
+            font-size: 13px;
         }
-        .todo-item span {
-            font-weight: bold;
+
+        .todo-item strong {
+            display: block;
+            margin-bottom: 5px;
         }
-        .todo-item p {
-            margin: 5px 0;
+
+        .meta {
+            font-size: 11px;
+            color: #555;
+            margin-top: 8px;
+            word-break: break-all;
         }
     </style>
 </head>
 <body>
 
-    <div class="todo-container">
-        <h2>To-Do List</h2>
-        <form id="todo-form">
-            <input type="text" id="item-name" name="item-name" placeholder="Item Name" required>
-            <textarea id="item-description" name="item-description" placeholder="Item Description" rows="4" required></textarea>
-            <button type="submit">Add Task</button>
-        </form>
+<div class="container">
+    <h2>Advanced Todo List</h2>
 
-        <ul class="todo-list" id="todo-list">
-            <!-- Todo items will appear here -->
-        </ul>
-    </div>
+    <form id="todoForm">
+        <input type="text" id="itemName" placeholder="Item Name" required>
+        <textarea id="itemDescription" rows="3" placeholder="Item Description" required></textarea>
+        <button type="submit">Add Item</button>
+    </form>
 
-    <script>
-        // Get form and elements
-        const form = document.getElementById('todo-form');
-        const itemNameInput = document.getElementById('item-name');
-        const itemDescriptionInput = document.getElementById('item-description');
-        const todoList = document.getElementById('todo-list');
+    <div id="todoList"></div>
+</div>
 
-        // Event listener for form submission
-        form.addEventListener('submit', function(e) {
-            e.preventDefault();
+<script>
+    const form = document.getElementById("todoForm");
+    const todoList = document.getElementById("todoList");
 
-            // Get values from inputs
-            const itemName = itemNameInput.value;
-            const itemDescription = itemDescriptionInput.value;
+    let itemCounter = 1;
 
-            // Create new list item
-            const listItem = document.createElement('li');
-            listItem.classList.add('todo-item');
+    // Generate UUID
+    function generateUUID() {
+        return crypto.randomUUID();
+    }
 
-            // Add item name and description to the list
-            listItem.innerHTML = `
-                <span>${itemName}</span>
-                <p>${itemDescription}</p>
-            `;
+    // Generate SHA-256 hash
+    async function generateHash(text) {
+        const encoder = new TextEncoder();
+        const data = encoder.encode(text);
+        const hashBuffer = await crypto.subtle.digest("SHA-256", data);
+        const hashArray = Array.from(new Uint8Array(hashBuffer));
+        return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+    }
 
-            // Append the new item to the list
-            todoList.appendChild(listItem);
+    form.addEventListener("submit", async function(e) {
+        e.preventDefault();
 
-            // Clear form fields
-            itemNameInput.value = '';
-            itemDescriptionInput.value = '';
-        });
-    </script>
+        const name = document.getElementById("itemName").value;
+        const description = document.getElementById("itemDescription").value;
+
+        const id = itemCounter++;
+        const uuid = generateUUID();
+        const hash = await generateHash(name + description + uuid);
+
+        const itemDiv = document.createElement("div");
+        itemDiv.classList.add("todo-item");
+
+        itemDiv.innerHTML = `
+            <strong>${name}</strong>
+            <div>${description}</div>
+
+            <div class="meta">
+                <div><b>Item ID:</b> ${id}</div>
+                <div><b>Item UUID:</b> ${uuid}</div>
+                <div><b>Item Hash (SHA-256):</b> ${hash}</div>
+            </div>
+        `;
+
+        todoList.appendChild(itemDiv);
+
+        form.reset();
+    });
+</script>
 
 </body>
 </html>
