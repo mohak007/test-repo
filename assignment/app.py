@@ -34,5 +34,10 @@ def todo():
 	form_data=dict(request.form)
 	return render_template('todo.html')
 
+
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+	return render_template('login.html')
+
 if __name__ == '__main__':
     app.run(debug=True)
