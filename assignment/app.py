@@ -29,5 +29,10 @@ def signup():
     form_data=dict(request.form)
     collection.insert_one(form_data)
     return "Data submitted successfully"
+@app.route('/todo', methods=['POST', 'GET'])
+def todo():
+	form_data=dict(request.form)
+	return render_template('todo.html')
+
 if __name__ == '__main__':
     app.run(debug=True)
