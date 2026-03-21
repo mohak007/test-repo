@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  flask-app:
+    build: .
+    container_name: flask-app
+    ports:
+      - "5000:5000"   # Maps container port 5000 to host port 5000
+    environment:
+      # Use your MongoDB Atlas URI here
+      - MONGO_URI=mongodb+srv://mohakkataria007_db_user:Password@ccluster0.lknf9iw.mongodb.net/?retryWrites=true&w=majority
+    volumes:
+      - .:/app         # Mount current directory into container (for live edits)
+    command: python3 app.py
