@@ -65,6 +65,13 @@
             margin-bottom: 5px;
         }
 
+        }
+
+        .todo-item strong {
+            display: block;
+            margin-bottom: 5px;
+        }
+
         .meta {
             font-size: 11px;
             color: #555;
@@ -107,12 +114,46 @@
         return hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
     }
 
+   form.addEventListener("submit", async function(e) {
+    e.preventDefault();
+
+    const name = document.getElementById("itemName").value;
+    const description = document.getElementById("itemDescription").value;
+
+    const id = itemCounter++;
+    const uuid = crypto.randomUUID();
+    const hash = await generateHash(name + description + uuid);
+
+    // SEND DATA TO FLASK BACKEND
+    await fetch("/submuttodoitem", {
+        method: "POST",
+        headers: {
+            "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+            itemName: name,
+            itemDescription: description,
+            itemID: id,
+            itemUUID: uuid,
+            itemHash: hash
+        })
+    });
     form.addEventListener("submit", async function(e) {
         e.preventDefault();
 
-        const name = document.getElementById("itemName").value;
-        const description = document.getElementById("itemDescription").value;
+    const itemDiv = document.createElement("div");
+    itemDiv.classList.add("todo-item");
 
+    itemDiv.innerHTML = `
+        <strong>${name}</strong>
+        <div>${description}</div>
+
+        <div class="meta">
+            <div><b>Item ID:</b> ${id}</div>
+            <div><b>Item UUID:</b> ${uuid}</div>
+            <div><b>Item Hash:</b> ${hash}</div>
+        </div>
+    `;
         const id = itemCounter++;
         const uuid = generateUUID();
         const hash = await generateHash(name + description + uuid);
@@ -131,8 +172,10 @@
             </div>
         `;
 
-        todoList.appendChild(itemDiv);
+    todoList.appendChild(itemDiv);
 
+    form.reset();
+});
         form.reset();
     });
 </script>
